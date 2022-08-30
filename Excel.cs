@@ -2,20 +2,23 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Office.Interop.Excel;
 
-namespace StarportExcel
+namespace ExcelCSharp
 {
     internal class Excel
     {
         private static Dictionary<string, Worksheet> dict = new Dictionary<string, Worksheet>();
         private readonly string path = "";
-        private _Application excel = new Microsoft.Office.Interop.Excel.Application();
+        private _Application excel = new Application();
         private Workbook wb;
         private Worksheet ws;
 
+        /// <summary>
+        /// Excel Constructor
+        /// </summary>
+        /// <param name="path">Include the file extension</param>
+        /// <param name="Sheet">Sheet's start at page 1 not page 0</param>
         public Excel(string path, int Sheet)
         {
             this.path = path;
@@ -27,6 +30,25 @@ namespace StarportExcel
         public static Dictionary<string, Worksheet> GetDictionairy()
         {
             return dict;
+        }
+
+        /// <summary>
+        /// If the file can be opened for exclusive access it means that the file
+        /// is no longer locked by another process.
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        public static bool IsFileReady(string filename)
+        {
+            try
+            {
+                using (System.IO.FileStream inputStream = System.IO.File.Open(filename, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.None))
+                    return inputStream.Length > 0;
+            }
+            catch (System.Exception)
+            {
+                return false;
+            }
         }
 
         public static void Kill()
@@ -54,16 +76,22 @@ namespace StarportExcel
             GC.WaitForPendingFinalizers();
         }
 
-        public bool ReadCellBool(int i, int j)
+        /// <summary>
+        /// reads the cell
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="column"></param>
+        /// <returns></returns>
+        public bool ReadCellBool(int row, int column)
         {
-            i++;
-            j++;
-            if (ws.Cells[i, j].Value == null)
+            row++;
+            column++;
+            if (ws.Cells[row, column].Value == null)
             {
                 return false;
             }
 
-            if (ws.Cells[i, j].Value == true)
+            if (ws.Cells[row, column].Value == true || ws.Cells[row, column].Value == 1)
             {
                 return true;
             }
@@ -76,36 +104,70 @@ namespace StarportExcel
         /// <summary>
         /// Read cell if double will return 0 if nothing is in the cell
         /// </summary>
-        /// <param name="i">row</param>
-        /// <param name="j">column</param>
-        /// <returns></returns>
-        public double ReadCellDouble(int i, int j)
+        /// <param name="row">row</param>
+        /// <param name="column">column</param>
+        /// <returns>Date in cell or new empty datetime</returns>
+        public DateTime ReadCellDateTime(int row, int column)
         {
-            i++;
-            j++;
-            if (ws.Cells[i, j].Value != null) return ws.Cells[i, j].Value;
+            row++;
+            column++;
+            if (ws.Cells[row, column].Value != null && DateTime.TryParse(ws.Cells[row, column].Value, out DateTime _)) return ws.Cells[row, column].Value;
+            else return new DateTime();
+        }
+
+        /// <summary>
+        /// Read cell if double will return 0 if nothing is in the cell
+        /// </summary>
+        /// <param name="row">row</param>
+        /// <param name="column">column</param>
+        /// <returns></returns>
+        public double ReadCellDouble(int row, int column)
+        {
+            row++;
+            column++;
+            if (ws.Cells[row, column].Value != null && double.TryParse(ws.Cells[row, column].Value, out double _)) return ws.Cells[row, column].Value;
             else return 0;
         }
 
-        public int ReadCellInt(int i, int j)
+        /// <summary>
+        /// Read cell if float will return 0 if nothing is in the cell
+        /// </summary>
+        /// <param name="row">row</param>
+        /// <param name="column">column</param>
+        /// <returns></returns>
+        public float ReadCellFloat(int row, int column)
         {
-            i++;
-            j++;
-            if (ws.Cells[i, j].Value != null) return (int)ws.Cells[i, j].Value;
+            row++;
+            column++;
+            if (ws.Cells[row, column].Value != null && float.TryParse(ws.Cells[row, column].Value, out float _)) return ws.Cells[row, column].Value;
+            else return 0;
+        }
+
+        /// <summary>
+        /// Read cell if int
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="column"></param>
+        /// <returns></returns>
+        public int ReadCellInt(int row, int column)
+        {
+            row++;
+            column++;
+            if (ws.Cells[row, column].Value != null && int.TryParse(ws.Cells[row, column].Value, out int _)) return (int)ws.Cells[row, column].Value;
             else return 0;
         }
 
         /// <summary>
         /// Read cell if string
         /// </summary>
-        /// <param name="i">row</param>
-        /// <param name="j">column</param>
-        /// <returns></returns>
-        public string ReadCellString(int i, int j)
+        /// <param name="row">row</param>
+        /// <param name="column">column</param>
+        /// <returns>returns the stirng or empty if nothing found or null</returns>
+        public string ReadCellString(int row, int column)
         {
-            i++;
-            j++;
-            if (ws.Cells[i, j].Value != null) return ws.Cells[i, j].Value;
+            row++;
+            column++;
+            if (ws.Cells[row, column].Value != null) return ws.Cells[row, column].Value;
             else return "";
         }
 
@@ -122,14 +184,14 @@ namespace StarportExcel
         /// <summary>
         /// Write to cell
         /// </summary>
-        /// <param name="i">row</param>
-        /// <param name="j">column</param>
+        /// <param name="row">row</param>
+        /// <param name="column">column</param>
         /// <param name="s">what you want to write</param>
-        public void WriteToCell(int i, int j, string s)
+        public void WriteToCell(int row, int column, string s)
         {
-            i++;
-            j++;
-            ws.Cells[i, j].Value = s;
+            row++;
+            column++;
+            ws.Cells[row, column].Value = s;
         }
 
         //public static int ReleaseComObject(object o);

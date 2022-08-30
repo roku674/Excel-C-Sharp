@@ -1,4 +1,6 @@
-﻿using System;
+﻿//Created by Alexander Fields https://github.com/roku674
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;

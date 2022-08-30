@@ -116,31 +116,29 @@ namespace ExcelCSharp
         }
 
         /// <summary>
-        /// Read cell if double will return 0 if nothing is in the cell
+        /// Read cell if double will
         /// </summary>
         /// <param name="row">row</param>
         /// <param name="column">column</param>
-        /// <returns></returns>
+        /// <returns>returns max value is nothing is found</returns>
         public double ReadCellDouble(int row, int column)
         {
             row++;
             column++;
             if (ws.Cells[row, column].Value != null && double.TryParse(ws.Cells[row, column].Value, out double _)) return ws.Cells[row, column].Value;
-            else return 0;
+            else return double.MaxValue;
         }
 
         /// <summary>
-        /// Read cell if float will return 0 if nothing is in the cell
+        /// Read cell if float max will
         /// </summary>
         /// <param name="row">row</param>
         /// <param name="column">column</param>
-        /// <returns></returns>
+        /// <returns>return float max if nothing is in the cell</returns>
         public float ReadCellFloat(int row, int column)
         {
-            row++;
-            column++;
             if (ws.Cells[row, column].Value != null && float.TryParse(ws.Cells[row, column].Value, out float _)) return ws.Cells[row, column].Value;
-            else return 0;
+            else return float.MaxValue;
         }
 
         /// <summary>
@@ -148,13 +146,11 @@ namespace ExcelCSharp
         /// </summary>
         /// <param name="row"></param>
         /// <param name="column"></param>
-        /// <returns></returns>
+        /// <returns>returns int max if nothing in cell</returns>
         public int ReadCellInt(int row, int column)
         {
-            row++;
-            column++;
             if (ws.Cells[row, column].Value != null && int.TryParse(ws.Cells[row, column].Value, out int _)) return (int)ws.Cells[row, column].Value;
-            else return 0;
+            else return int.MaxValue;
         }
 
         /// <summary>
@@ -165,8 +161,6 @@ namespace ExcelCSharp
         /// <returns>returns the stirng or empty if nothing found or null</returns>
         public string ReadCellString(int row, int column)
         {
-            row++;
-            column++;
             if (ws.Cells[row, column].Value != null) return ws.Cells[row, column].Value;
             else return "";
         }
@@ -189,8 +183,6 @@ namespace ExcelCSharp
         /// <param name="s">what you want to write</param>
         public void WriteToCell(int row, int column, string s)
         {
-            row++;
-            column++;
             ws.Cells[row, column].Value = s;
         }
 

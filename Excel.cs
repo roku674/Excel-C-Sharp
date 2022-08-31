@@ -11,9 +11,6 @@ namespace ExcelCSharp
     internal class Excel
     {
         private static Dictionary<string, Microsoft.Office.Interop.Excel.Worksheet> dict = new Dictionary<string, Worksheet>();
-        public int rowCount { get; set; }
-        public int colCount { get; set; }
-        private static Dictionary<string, Worksheet> dict = new Dictionary<string, Worksheet>();
         private readonly string path = "";
         private Microsoft.Office.Interop.Excel._Application excel = new Application();
         private Microsoft.Office.Interop.Excel.Workbook wb;
@@ -37,7 +34,28 @@ namespace ExcelCSharp
             colCount = excelRange.Columns.Count;
         }
 
-        public static Dictionary<string, Microsoft.Office.Interop.Excel.Worksheet> GetDictionairy()
+        public int colCount { get; set; }
+        public int rowCount { get; set; }
+
+        public static void ConvertFromCSVtoXLSX(string csv, string xls)
+        {
+            Microsoft.Office.Interop.Excel.Application xl = new Application();
+            //Open Excel Workbook for conversion.
+            Microsoft.Office.Interop.Excel.Workbook wb = xl.Workbooks.Open(csv);
+            Microsoft.Office.Interop.Excel.Worksheet ws = (Microsoft.Office.Interop.Excel.Worksheet)wb.Worksheets.get_Item(1);
+            //Select The UsedRange
+            Microsoft.Office.Interop.Excel.Range used = ws.UsedRange;
+            //Autofit The Columns
+            used.EntireColumn.AutoFit();
+            //Save file as csv file
+            wb.SaveAs(xls, 51);
+            //Close the Workbook.
+            wb.Close();
+            //Quit Excel Application.
+            xl.Quit();
+        }
+
+        public static Dictionary<string, Worksheet> GetDictionairy()
         {
             return dict;
         }
@@ -86,40 +104,32 @@ namespace ExcelCSharp
             GC.WaitForPendingFinalizers();
         }
 
-        public static void ConvertFromCSVtoXLSX(string csv, string xls)
+        /// <summary>
+        /// reads the cell
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        /// <returns>the object itself</returns>
+        public object ReadCell(int row, int col)
         {
-            Microsoft.Office.Interop.Excel.Application xl = new Application();
-            //Open Excel Workbook for conversion.
-            Microsoft.Office.Interop.Excel.Workbook wb = xl.Workbooks.Open(csv);
-            Microsoft.Office.Interop.Excel.Worksheet ws = (Microsoft.Office.Interop.Excel.Worksheet)wb.Worksheets.get_Item(1);
-            //Select The UsedRange
-            Microsoft.Office.Interop.Excel.Range used = ws.UsedRange;
-            //Autofit The Columns
-            used.EntireColumn.AutoFit();
-            //Save file as csv file
-            wb.SaveAs(xls, 51);
-            //Close the Workbook.
-            wb.Close();
-            //Quit Excel Application.
-            xl.Quit();
+            if (ws.Cells[row, col] != null) return ws.Cells[row, col];
+            else return null;
         }
 
         /// <summary>
         /// reads the cell
         /// </summary>
         /// <param name="row"></param>
-        /// <param name="column"></param>
+        /// <param name="col"></param>
         /// <returns></returns>
-        public bool ReadCellBool(int row, int column)
+        public bool ReadCellBool(int row, int col)
         {
-            row++;
-            column++;
-            if (ws.Cells[row, column].Value == null)
+            if ((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text == null)
             {
                 return false;
             }
 
-            if (ws.Cells[row, column].Value == true || ws.Cells[row, column].Value == 1)
+            if ((bool)(ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text == true)
             {
                 return true;
             }
@@ -133,64 +143,116 @@ namespace ExcelCSharp
         /// Read cell if double will return 0 if nothing is in the cell
         /// </summary>
         /// <param name="row">row</param>
-        /// <param name="column">column</param>
-        /// <returns>Date in cell or new empty datetime</returns>
-        public DateTime ReadCellDateTime(int row, int column)
+        /// <param name="col">col</param>
+        /// <returns>Date in cell or DateTime's max value</returns>
+        public DateTime ReadCellDateTime(int row, int col)
         {
-            row++;
-            column++;
-            if (ws.Cells[row, column].Value != null && DateTime.TryParse(ws.Cells[row, column].Value, out DateTime _)) return ws.Cells[row, column].Value;
-            else return new DateTime();
+            DateTime cell = DateTime.MaxValue;
+            bool isDateTime = DateTime.TryParse((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text, out cell);
+            if (isDateTime)
+            {
+                return cell;
+            }
+            else
+            {
+                return cell;
+            }
         }
 
         /// <summary>
         /// Read cell if double will
         /// </summary>
         /// <param name="row">row</param>
-        /// <param name="column">column</param>
+        /// <param name="col">col</param>
         /// <returns>returns max value is nothing is found</returns>
-        public double ReadCellDouble(int row, int column)
+        public double ReadCellDouble(int row, int col)
         {
-            row++;
-            column++;
-            if (ws.Cells[row, column].Value != null && double.TryParse(ws.Cells[row, column].Value, out double _)) return ws.Cells[row, column].Value;
-            else return double.MaxValue;
+            double cell = double.MaxValue;
+            bool isDouble = double.TryParse((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text, out cell);
+            if (isDouble)
+            {
+                return cell;
+            }
+            else
+            {
+                return cell;
+            }
         }
 
         /// <summary>
         /// Read cell if float max will
         /// </summary>
         /// <param name="row">row</param>
-        /// <param name="column">column</param>
+        /// <param name="col">col</param>
         /// <returns>return float max if nothing is in the cell</returns>
-        public float ReadCellFloat(int row, int column)
+        public float ReadCellFloat(int row, int col)
         {
-            if (ws.Cells[row, column].Value != null && float.TryParse(ws.Cells[row, column].Value, out float _)) return ws.Cells[row, column].Value;
-            else return float.MaxValue;
+            float cell = float.MaxValue;
+            bool isFloat = float.TryParse((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text, out cell);
+            if (isFloat)
+            {
+                return cell;
+            }
+            else
+            {
+                return cell;
+            }
         }
 
         /// <summary>
         /// Read cell if int
         /// </summary>
         /// <param name="row"></param>
-        /// <param name="column"></param>
+        /// <param name="col"></param>
         /// <returns>returns int max if nothing in cell</returns>
-        public int ReadCellInt(int row, int column)
+        public int ReadCellInt(int row, int col)
         {
-            if (ws.Cells[row, column].Value != null && int.TryParse(ws.Cells[row, column].Value, out int _)) return (int)ws.Cells[row, column].Value;
-            else return int.MaxValue;
+            int cell = int.MaxValue;
+            bool isInt = int.TryParse((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text, out cell);
+            if (isInt)
+            {
+                return cell;
+            }
+            else
+            {
+                return cell;
+            }
+        }
+
+        /// <summary>
+        /// reads the cell
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        /// <returns>object as range</returns>
+        public Microsoft.Office.Interop.Excel.Range ReadCellRange(int row, int col)
+        {
+            if ((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text != null)
+            {
+                return (ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>
         /// Read cell if string
         /// </summary>
         /// <param name="row">row</param>
-        /// <param name="column">column</param>
-        /// <returns>returns the stirng or empty if nothing found or null</returns>
-        public string ReadCellString(int row, int column)
+        /// <param name="col">col</param>
+        /// <returns>returns the string or null if nothing found or null</returns>
+        public string ReadCellString(int row, int col)
         {
-            if (ws.Cells[row, column].Value != null) return ws.Cells[row, column].Value;
-            else return "";
+            if ((string)(ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text != null)
+            {
+                return (string)(ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public void Save()
@@ -207,11 +269,11 @@ namespace ExcelCSharp
         /// Write to cell
         /// </summary>
         /// <param name="row">row</param>
-        /// <param name="column">column</param>
+        /// <param name="col">col</param>
         /// <param name="s">what you want to write</param>
-        public void WriteToCell(int row, int column, string s)
+        public void WriteToCell(int row, int col, string s)
         {
-            ws.Cells[row, column].Value = s;
+            (ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text = s;
         }
 
         //public static int ReleaseComObject(object o);

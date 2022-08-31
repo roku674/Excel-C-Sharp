@@ -11,6 +11,9 @@ namespace ExcelCSharp
     internal class Excel
     {
         private static Dictionary<string, Microsoft.Office.Interop.Excel.Worksheet> dict = new Dictionary<string, Worksheet>();
+        public int rowCount {get; set;}
+        public int colCount {get; set;}
+        private static Dictionary<string, Worksheet> dict = new Dictionary<string, Worksheet>();
         private readonly string path = "";
         private Microsoft.Office.Interop.Excel._Application excel = new Application();
         private Microsoft.Office.Interop.Excel.Workbook wb;
@@ -25,8 +28,13 @@ namespace ExcelCSharp
         {
             this.path = path;
             excel.DisplayAlerts = false;
+
             wb = excel.Workbooks.Open(path);
             ws = (Microsoft.Office.Interop.Excel.Worksheet)wb.Worksheets[Sheet];
+
+            Range excelRange = ws.UsedRange;
+            rowCount = excelRange.Rows.Count;
+            colCount = excelRange.Columns.Count;
         }
 
         public static Dictionary<string, Microsoft.Office.Interop.Excel.Worksheet> GetDictionairy()

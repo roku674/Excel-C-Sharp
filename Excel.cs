@@ -8,7 +8,7 @@ using Microsoft.Office.Interop.Excel;
 
 namespace ExcelCSharp
 {
-    internal class Excel
+    public class Excel
     {
         private static Dictionary<string, Microsoft.Office.Interop.Excel.Worksheet> dict = new Dictionary<string, Worksheet>();
         private readonly string path = "";
@@ -121,7 +121,7 @@ namespace ExcelCSharp
         /// </summary>
         /// <param name="row"></param>
         /// <param name="col"></param>
-        /// <returns></returns>
+        /// <returns> if null or empty returns false</returns>
         public bool ReadCellBool(int row, int col)
         {
             if ((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text == null)
@@ -129,7 +129,11 @@ namespace ExcelCSharp
                 return false;
             }
 
-            if ((bool)(ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text == true)
+            if (ReadCellString(row, col) == "TRUE")
+            {
+                return true;
+            }
+            else if (ReadCellInt(row, col) == 1)
             {
                 return true;
             }
@@ -149,14 +153,16 @@ namespace ExcelCSharp
         {
             DateTime cell = DateTime.MaxValue;
             bool isDateTime = DateTime.TryParse((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text, out cell);
-            if (isDateTime)
+            /*
+            if (!isDateTime)
             {
-                return cell;
-            }
-            else
-            {
-                return cell;
-            }
+                string cellString = ReadCellString(row, col);
+                if (cellString != null)
+                {
+                    cell = (DateTime)Algorithms.DateManipulation.ToDate(cellString, new string[] { "mm-dd hh:mmtt yyyy" });
+                }
+            }*/
+            return cell;
         }
 
         /// <summary>
@@ -164,19 +170,12 @@ namespace ExcelCSharp
         /// </summary>
         /// <param name="row">row</param>
         /// <param name="col">col</param>
-        /// <returns>returns max value is nothing is found</returns>
+        /// <returns>returns 0 is nothing is found</returns>
         public double ReadCellDouble(int row, int col)
         {
-            double cell = double.MaxValue;
-            bool isDouble = double.TryParse((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text, out cell);
-            if (isDouble)
-            {
-                return cell;
-            }
-            else
-            {
-                return cell;
-            }
+            double cell = 0;
+            double.TryParse((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text, out cell); //this returns a bool but i dont need it
+            return cell;
         }
 
         /// <summary>
@@ -184,19 +183,12 @@ namespace ExcelCSharp
         /// </summary>
         /// <param name="row">row</param>
         /// <param name="col">col</param>
-        /// <returns>return float max if nothing is in the cell</returns>
+        /// <returns>returns 0 if nothing is in the cell</returns>
         public float ReadCellFloat(int row, int col)
         {
-            float cell = float.MaxValue;
-            bool isFloat = float.TryParse((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text, out cell);
-            if (isFloat)
-            {
-                return cell;
-            }
-            else
-            {
-                return cell;
-            }
+            float cell = 0;
+            float.TryParse((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text, out cell); //this returns a bool but i dont need it
+            return cell;
         }
 
         /// <summary>
@@ -204,37 +196,34 @@ namespace ExcelCSharp
         /// </summary>
         /// <param name="row"></param>
         /// <param name="col"></param>
-        /// <returns>returns int max if nothing in cell</returns>
+        /// <returns>returns 0 if nothing in cell</returns>
         public int ReadCellInt(int row, int col)
         {
-            int cell = int.MaxValue;
-            bool isInt = int.TryParse((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text, out cell);
-            if (isInt)
-            {
-                return cell;
-            }
-            else
-            {
-                return cell;
-            }
+            int cell = 0;
+            int.TryParse((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text, out cell); //this returns a bool but i dont need it
+            return cell;
         }
 
         /// <summary>
-        /// reads the cell
+        /// returns the entire excel sheet
         /// </summary>
-        /// <param name="row"></param>
-        /// <param name="col"></param>
-        /// <returns>object as range</returns>
-        public Microsoft.Office.Interop.Excel.Range ReadCellRange(int row, int col)
+        /// <param name="startRow"></param>
+        /// <param name="startCol"></param>
+        /// <param name="endRow"></param>
+        /// <param name="endCol"></param>
+        /// <returns>2d obj arr</returns>
+        public object[,] ReadCellRange()
         {
-            if ((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text != null)
-            {
-                return (ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text;
-            }
-            else
-            {
-                return null;
-            }
+            return ws.UsedRange.Value;
+        }
+
+        /// <summary>
+        /// Read the entire excel sheet faster but wont give datetimes
+        /// </summary>
+        /// <returns>2d object arr</returns>
+        public object[,] ReadCellRangeFast()
+        {
+            return ws.UsedRange.Value2;
         }
 
         /// <summary>
@@ -273,7 +262,7 @@ namespace ExcelCSharp
         /// <param name="s">what you want to write</param>
         public void WriteToCell(int row, int col, string s)
         {
-            (ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text = s;
+            (ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Value = s;
         }
 
         //public static int ReleaseComObject(object o);

@@ -10,11 +10,11 @@ namespace ExcelCSharp
 {
     internal class Excel
     {
-        private static Dictionary<string, Worksheet> dict = new Dictionary<string, Worksheet>();
+        private static Dictionary<string, Microsoft.Office.Interop.Excel.Worksheet> dict = new Dictionary<string, Worksheet>();
         private readonly string path = "";
-        private _Application excel = new Application();
-        private Workbook wb;
-        private Worksheet ws;
+        private Microsoft.Office.Interop.Excel._Application excel = new Application();
+        private Microsoft.Office.Interop.Excel.Workbook wb;
+        private Microsoft.Office.Interop.Excel.Worksheet ws;
 
         /// <summary>
         /// Excel Constructor
@@ -26,10 +26,10 @@ namespace ExcelCSharp
             this.path = path;
             excel.DisplayAlerts = false;
             wb = excel.Workbooks.Open(path);
-            ws = wb.Worksheets[Sheet];
+            ws = (Microsoft.Office.Interop.Excel.Worksheet)wb.Worksheets[Sheet];
         }
 
-        public static Dictionary<string, Worksheet> GetDictionairy()
+        public static Dictionary<string, Microsoft.Office.Interop.Excel.Worksheet> GetDictionairy()
         {
             return dict;
         }
@@ -76,6 +76,24 @@ namespace ExcelCSharp
             Marshal.FinalReleaseComObject(excel);
             GC.Collect();
             GC.WaitForPendingFinalizers();
+        }
+
+        public static void ConvertFromCSVtoXLSX(string csv, string xls)
+        {
+            Microsoft.Office.Interop.Excel.Application xl = new Application();
+            //Open Excel Workbook for conversion.
+            Microsoft.Office.Interop.Excel.Workbook wb = xl.Workbooks.Open(csv);
+            Microsoft.Office.Interop.Excel.Worksheet ws = (Microsoft.Office.Interop.Excel.Worksheet)wb.Worksheets.get_Item(1);
+            //Select The UsedRange
+            Microsoft.Office.Interop.Excel.Range used = ws.UsedRange;
+            //Autofit The Columns
+            used.EntireColumn.AutoFit();
+            //Save file as csv file
+            wb.SaveAs(xls, 51);
+            //Close the Workbook.
+            wb.Close();
+            //Quit Excel Application.
+            xl.Quit();
         }
 
         /// <summary>

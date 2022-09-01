@@ -39,20 +39,11 @@ namespace ExcelCSharp
 
         public static void ConvertFromCSVtoXLSX(string csv, string xls)
         {
-            Microsoft.Office.Interop.Excel.Application xl = new Application();
-            //Open Excel Workbook for conversion.
-            Microsoft.Office.Interop.Excel.Workbook wb = xl.Workbooks.Open(csv);
-            Microsoft.Office.Interop.Excel.Worksheet ws = (Microsoft.Office.Interop.Excel.Worksheet)wb.Worksheets.get_Item(1);
-            //Select The UsedRange
-            Microsoft.Office.Interop.Excel.Range used = ws.UsedRange;
-            //Autofit The Columns
-            used.EntireColumn.AutoFit();
-            //Save file as csv file
-            wb.SaveAs(xls, 51);
-            //Close the Workbook.
+            Application app = new Application();
+            Workbook wb = app.Workbooks.Open(csv, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
+            wb.SaveAs(xls, XlFileFormat.xlOpenXMLWorkbook, Type.Missing, Type.Missing, Type.Missing, Type.Missing, XlSaveAsAccessMode.xlExclusive, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
             wb.Close();
-            //Quit Excel Application.
-            xl.Quit();
+            app.Quit();
         }
 
         public static Dictionary<string, Worksheet> GetDictionairy()

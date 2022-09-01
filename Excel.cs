@@ -218,6 +218,15 @@ namespace ExcelCSharp
         }
 
         /// <summary>
+        /// returns the entire excel sheet
+        /// </summary>
+        /// <returns>2d string arr</returns>
+        public string[,] ReadCellRangeStr()
+        {
+            return ws.UsedRange.Text;
+        }
+
+        /// <summary>
         /// Read the entire excel sheet faster but wont give datetimes
         /// </summary>
         /// <returns>2d object arr</returns>

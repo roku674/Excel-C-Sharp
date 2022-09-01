@@ -26,7 +26,15 @@ namespace ExcelCSharp
             this.path = path;
             excel.DisplayAlerts = false;
 
-            wb = excel.Workbooks.Open(path);
+            if (path.Contains(".csv"))
+            {
+                excel.Workbooks.Open(path, XlFileFormat.xlCSV);
+            }
+            else
+            {
+                wb = excel.Workbooks.Open(path);
+            }
+
             ws = (Microsoft.Office.Interop.Excel.Worksheet)wb.Worksheets[Sheet];
 
             Microsoft.Office.Interop.Excel.Range excelRange = ws.UsedRange;
@@ -39,11 +47,6 @@ namespace ExcelCSharp
 
         public static void ConvertFromCSVtoXLSX(string csv, string xls)
         {
-            Application app = new Application();
-            Workbook wb = app.Workbooks.Open(csv, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
-            wb.SaveAs(xls, XlFileFormat.xlOpenXMLWorkbook, Type.Missing, Type.Missing, Type.Missing, Type.Missing, XlSaveAsAccessMode.xlExclusive, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
-            wb.Close();
-            app.Quit();
         }
 
         public static Dictionary<string, Worksheet> GetDictionairy()

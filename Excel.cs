@@ -1,16 +1,19 @@
 ﻿//Created by Alexander Fields https://github.com/roku674
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Office.Interop.Excel;
 
 namespace ExcelCSharp
 {
+    /// <summary>
+    /// Call this class to be able to open workbooks
+    /// </summary>
     public class Excel
     {
-        private static Dictionary<string, Microsoft.Office.Interop.Excel.Worksheet> dict = new Dictionary<string, Worksheet>();
+        private static Dictionary<string, Microsoft.Office.Interop.Excel.Worksheet> dict = new Dictionary<string, Microsoft.Office.Interop.Excel.Worksheet>();
         private readonly string path = "";
         private Microsoft.Office.Interop.Excel._Application excel = new Application();
         private Microsoft.Office.Interop.Excel.Workbook wb;
@@ -24,6 +27,16 @@ namespace ExcelCSharp
         public Excel(string path, int Sheet)
         {
             this.path = path;
+
+            if (!System.IO.File.Exists(path))
+            {
+                Application app = new Microsoft.Office.Interop.Excel.Application();
+                app.DisplayAlerts = false;
+                Microsoft.Office.Interop.Excel.Workbook wb = app.Workbooks.Add();
+                wb.Save();
+                wb.Close();
+            }
+
             excel.DisplayAlerts = false;
 
             if (path.Contains(".csv"))
@@ -45,13 +58,59 @@ namespace ExcelCSharp
         public int colCount { get; set; }
         public int rowCount { get; set; }
 
-        public static void ConvertFromCSVtoXLSX(string csv, string xls)
+        public async System.Threading.Tasks.Task ConvertFromCSVtoXLSXAsync(string csv)
         {
+            //System.Data.DataTable dataTable = ConvertCsvToDataTable(csv); //save datatable to xlsx
+
+            string xlsx = System.IO.Path.ChangeExtension(csv, ".xlsx");
+            if (System.IO.File.Exists(xlsx))
+            {
+                System.IO.File.Delete(xlsx);
+            }
+
+            try
+            {
+                Application app = new Application();
+                Workbook wb = app.Workbooks.Open(csv, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing);
+                app.DisplayAlerts = false;
+                wb.SaveCopyAs(xlsx);
+                wb.Close();
+                app.Quit();
+            }
+            catch (System.Exception e)
+            {
+                System.Console.WriteLine(e);
+                throw e;
+            }
+            await System.Threading.Tasks.Task.Delay(5);
         }
 
-        public static Dictionary<string, Worksheet> GetDictionairy()
+        public static Dictionary<string, Microsoft.Office.Interop.Excel.Worksheet> GetDictionairy()
         {
             return dict;
+        }
+
+        internal System.Data.DataTable ConvertCsvToDataTable(string filePath)
+        {
+            System.IO.StreamReader sr = new System.IO.StreamReader(filePath);
+            string[] headers = sr.ReadLine().Split(',');
+            System.Data.DataTable dataTable = new System.Data.DataTable();
+            foreach (string header in headers)
+            {
+                dataTable.Columns.Add(header);
+            }
+            while (!sr.EndOfStream)
+            {
+                string[] rows = System.Text.RegularExpressions.Regex.Split(sr.ReadLine(), ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+                System.Data.DataRow dr = dataTable.NewRow();
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    dr[i] = rows[i];
+                }
+                dataTable.Rows.Add(dr);
+            }
+
+            return dataTable;
         }
 
         /// <summary>
@@ -88,14 +147,14 @@ namespace ExcelCSharp
         public void Close()
         {
             Save();
-            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
-            GC.WaitForPendingFinalizers();
+            System.GC.Collect(System.GC.MaxGeneration, System.GCCollectionMode.Forced);
+            System.GC.WaitForPendingFinalizers();
             excel.Quit();
             Marshal.FinalReleaseComObject(ws);
             Marshal.FinalReleaseComObject(wb);
             Marshal.FinalReleaseComObject(excel);
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+            System.GC.Collect();
+            System.GC.WaitForPendingFinalizers();
         }
 
         /// <summary>
@@ -143,10 +202,10 @@ namespace ExcelCSharp
         /// <param name="row">row</param>
         /// <param name="col">col</param>
         /// <returns>Date in cell or DateTime's max value</returns>
-        public DateTime ReadCellDateTime(int row, int col)
+        public System.DateTime ReadCellDateTime(int row, int col)
         {
-            DateTime cell = DateTime.MaxValue;
-            bool isDateTime = DateTime.TryParse((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text, out cell);
+            System.DateTime cell = System.DateTime.MaxValue;
+            bool isDateTime = System.DateTime.TryParse((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text, out cell);
             /*
             if (!isDateTime)
             {
@@ -196,6 +255,11 @@ namespace ExcelCSharp
             int cell = 0;
             int.TryParse((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text, out cell); //this returns a bool but i dont need it
             return cell;
+        }
+
+        public string[][] ReadLines()
+        {
+            return System.IO.File.ReadLines(path).Select(x => x.Split(',')).ToArray();
         }
 
         /// <summary>

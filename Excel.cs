@@ -58,30 +58,41 @@ namespace ExcelCSharp
         public int colCount { get; set; }
         public int rowCount { get; set; }
 
-        public async System.Threading.Tasks.Task ConvertFromCSVtoXLSXAsync(string csv)
+        public static async System.Threading.Tasks.Task ConvertFromCSVtoXLSXAsync(string csv, string xlsx)
         {
             //System.Data.DataTable dataTable = ConvertCsvToDataTable(csv); //save datatable to xlsx
+            string copy = System.IO.Directory.GetCurrentDirectory() + "/Copy.xlsx";
+            if (System.IO.File.Exists(copy))
+            {
+                System.IO.File.Delete(copy);
+            }
 
-            string xlsx = System.IO.Path.ChangeExtension(csv, ".xlsx");
+            Application app = new Application();
+            Workbook wb = app.Workbooks.Open(csv, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing);
+            app.DisplayAlerts = false;
+            wb.SaveAs(copy,
+                    XlFileFormat.xlWorkbookDefault,
+                    System.Reflection.Missing.Value,
+                    System.Reflection.Missing.Value,
+                    false,
+                    false,
+                    Microsoft.Office.Interop.Excel.XlSaveAsAccessMode.xlNoChange,
+                    false,
+                    false,
+                  System.Reflection.Missing.Value,
+                  System.Reflection.Missing.Value,
+                  System.Reflection.Missing.Value);
+            wb.Close();
+            app.Quit();
+
             if (System.IO.File.Exists(xlsx))
             {
                 System.IO.File.Delete(xlsx);
             }
 
-            try
-            {
-                Application app = new Application();
-                Workbook wb = app.Workbooks.Open(csv, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing);
-                app.DisplayAlerts = false;
-                wb.SaveCopyAs(xlsx);
-                wb.Close();
-                app.Quit();
-            }
-            catch (System.Exception e)
-            {
-                System.Console.WriteLine(e);
-                throw e;
-            }
+            System.IO.File.Copy(copy, xlsx);
+            System.IO.File.Delete(copy);
+
             await System.Threading.Tasks.Task.Delay(5);
         }
 
@@ -123,8 +134,8 @@ namespace ExcelCSharp
         {
             try
             {
-                using (System.IO.FileStream inputStream = System.IO.File.Open(filename, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.None))
-                    return inputStream.Length > 0;
+                using System.IO.FileStream inputStream = System.IO.File.Open(filename, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.None);
+                return inputStream.Length > 0;
             }
             catch (System.Exception)
             {

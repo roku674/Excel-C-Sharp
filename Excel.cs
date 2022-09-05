@@ -61,7 +61,7 @@ namespace ExcelCSharp
         public static async System.Threading.Tasks.Task ConvertFromCSVtoXLSXAsync(string csv, string xlsx)
         {
             //System.Data.DataTable dataTable = ConvertCsvToDataTable(csv); //save datatable to xlsx
-            string copy = System.IO.Directory.GetCurrentDirectory() + "/Copy.xlsx";
+            string copy = System.IO.Path.GetTempFileName();
             if (System.IO.File.Exists(copy))
             {
                 System.IO.File.Delete(copy);

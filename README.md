@@ -1,5 +1,5 @@
 # Excel-C-Sharp
-C# script for dealing with Excel
+C# script for retrieving and storing information in Excel
 <h2>
   Assemblies
 </h2>

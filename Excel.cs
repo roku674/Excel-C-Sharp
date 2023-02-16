@@ -133,7 +133,8 @@ namespace ExcelCSharp
         }
 
         /// <summary>
-        /// Reads each cell by seperating them by comma (if you have commas in the cells this could be prone to failure)
+        /// Reads each cell by seperating them by comma (if you have commas in the cells this could
+        /// be prone to failure)
         /// </summary>
         /// <param name="csv"></param>
         /// <returns>2d string array</returns>
@@ -148,8 +149,8 @@ namespace ExcelCSharp
         }
 
         /// <summary>
-        /// If the file can be opened for exclusive access it means that the file
-        /// is no longer locked by another process.
+        /// If the file can be opened for exclusive access it means that the file is no longer
+        /// locked by another process.
         /// </summary>
         /// <param name="filename"></param>
         /// <returns></returns>
@@ -208,7 +209,7 @@ namespace ExcelCSharp
         /// </summary>
         /// <param name="row"></param>
         /// <param name="col"></param>
-        /// <returns> if null or empty returns false</returns>
+        /// <returns>if null or empty returns false</returns>
         public bool ReadCellBool(int row, int col)
         {
             if ((ws.Cells[row, col] as Microsoft.Office.Interop.Excel.Range).Text == null)
@@ -379,7 +380,7 @@ namespace ExcelCSharp
             {
                 string[] rows = System.Text.RegularExpressions.Regex.Split(sr.ReadLine(), ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
                 System.Data.DataRow dr = dataTable.NewRow();
-                for (int i = 0; i < headers.Length; i++)
+                for (int i = 0;i < headers.Length;i++)
                 {
                     dr[i] = rows[i];
                 }
